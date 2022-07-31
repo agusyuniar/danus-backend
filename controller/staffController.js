@@ -5,6 +5,11 @@ const { createJWTToken } = require('../helpers/jwt')
 
 const kuncirahasia = 'powerranger'
 module.exports = {
+    keepLogin: (req,res) => {
+        console.log('sCline9 ',req);
+        res.status(200).send({ ...req.user, token: req.token })
+
+    },
     list: (req,res) => {
         const sql = 'SELECT * from staff';
         sqlDB.query(sql,(err,results)=>{
@@ -22,8 +27,8 @@ module.exports = {
         // password = cryp.createHmac('sha256', kuncirahasia)
         //             .update(password)
         //             .digest('hex');
-        console.log(username);
-        console.log(password);
+        console.log('login : ',username);
+        console.log('pass: ',password);
         var sql = `SELECT username, password
                     FROM staff
                     WHERE username = ${sqlDB.escape(username)}
@@ -37,7 +42,7 @@ module.exports = {
                 return res.status(500).send({message:'Username atau Password salah'})
             }
             console.log('sukses');
-            var token = createJWTToken({...result[0]},{expiresIn:'2h'})
+            var token = createJWTToken({...result[0]},{expiresIn:'1h'})
             res.status(200).send({...result[0], token})
         })
     }
