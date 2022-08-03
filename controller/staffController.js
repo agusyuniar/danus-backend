@@ -45,5 +45,30 @@ module.exports = {
             var token = createJWTToken({...result[0]},{expiresIn:'1h'})
             res.status(200).send({...result[0], token})
         })
+    },
+
+    registerStaff: (req,res) => {
+        req.body.password = cryp.createHmac('sha256',kuncirahasia)
+            .update(req.body.password)
+            .digest('hex');
+        let scriptCekUsername = `select * from staff where username = ${sqlDB.escape(req.body.username)}`
+
+        sqlDB.query(scriptCekUsername, (err, resultUsername) => {
+            console.log('cek username : ', resultUsername);
+            if(err) return res.status(500).send({message: 'Database error (username)', err, error:true})
+
+            if(resultUsername.length>0){
+                return res.status(500).send({err, message: 'Username sudah terdaftar'})
+            }
+            let scriptRegis = `insert into staff set ? `
+            sqlDB.query(scriptRegis, req.body, (err, results) => {
+                if(err) return res.status(500).send({message:'Database error (gagal insert)', err, error:true})
+
+                var {username, password} = req.body;
+                var token = createJWTToken({username, password});
+
+                res.status(200).send({result: results, username: req.body.username})
+            })
+        })
     }
 }
